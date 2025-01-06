@@ -1,8 +1,0 @@
-torch
-MDAnalysis
-pandas
-biopython
-pydantic
-einops
-natsort
-rotary_embedding_torch
