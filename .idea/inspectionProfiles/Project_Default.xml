@@ -1,0 +1,69 @@
+<component name="InspectionProjectProfileManager">
+  <profile version="1.0">
+    <option name="myName" value="Project Default" />
+    <inspection_tool class="ES6ConvertVarToLetConst" enabled="false" level="WEAK WARNING" enabled_by_default="false" />
+    <inspection_tool class="HtmlUnknownTag" enabled="true" level="WARNING" enabled_by_default="true">
+      <option name="myValues">
+        <value>
+          <list size="7">
+            <item index="0" class="java.lang.String" itemvalue="nobr" />
+            <item index="1" class="java.lang.String" itemvalue="noembed" />
+            <item index="2" class="java.lang.String" itemvalue="comment" />
+            <item index="3" class="java.lang.String" itemvalue="noscript" />
+            <item index="4" class="java.lang.String" itemvalue="embed" />
+            <item index="5" class="java.lang.String" itemvalue="script" />
+            <item index="6" class="java.lang.String" itemvalue="p" />
+          </list>
+        </value>
+      </option>
+      <option name="myCustomValuesEnabled" value="true" />
+    </inspection_tool>
+    <inspection_tool class="PyAugmentAssignmentInspection" enabled="true" level="WEAK WARNING" enabled_by_default="true" />
+    <inspection_tool class="PyClassicStyleClassInspection" enabled="true" level="WARNING" enabled_by_default="true" />
+    <inspection_tool class="PyPackageRequirementsInspection" enabled="true" level="WARNING" enabled_by_default="true">
+      <option name="ignoredPackages">
+        <value>
+          <list size="23">
+            <item index="0" class="java.lang.String" itemvalue="pandas" />
+            <item index="1" class="java.lang.String" itemvalue="shapely" />
+            <item index="2" class="java.lang.String" itemvalue="scipy" />
+            <item index="3" class="java.lang.String" itemvalue="scikit-learn" />
+            <item index="4" class="java.lang.String" itemvalue="matplotlib" />
+            <item index="5" class="java.lang.String" itemvalue="numpy" />
+            <item index="6" class="java.lang.String" itemvalue="SQLAlchemy" />
+            <item index="7" class="java.lang.String" itemvalue="google" />
+            <item index="8" class="java.lang.String" itemvalue="uvicorn" />
+            <item index="9" class="java.lang.String" itemvalue="kfp" />
+            <item index="10" class="java.lang.String" itemvalue="motion-lake-client" />
+            <item index="11" class="java.lang.String" itemvalue="django-import_export" />
+            <item index="12" class="java.lang.String" itemvalue="ninja" />
+            <item index="13" class="java.lang.String" itemvalue="yaml" />
+            <item index="14" class="java.lang.String" itemvalue="OAG-Core" />
+            <item index="15" class="java.lang.String" itemvalue="phonenumbers" />
+            <item index="16" class="java.lang.String" itemvalue="django-formtools" />
+            <item index="17" class="java.lang.String" itemvalue="django_ace" />
+            <item index="18" class="java.lang.String" itemvalue="django-compressor" />
+            <item index="19" class="java.lang.String" itemvalue="mailchimp-marketing-python" />
+            <item index="20" class="java.lang.String" itemvalue="oag-core" />
+            <item index="21" class="java.lang.String" itemvalue="ProDy" />
+            <item index="22" class="java.lang.String" itemvalue="mdaencore" />
+          </list>
+        </value>
+      </option>
+    </inspection_tool>
+    <inspection_tool class="PyPep8NamingInspection" enabled="true" level="WEAK WARNING" enabled_by_default="true">
+      <option name="ignoredErrors">
+        <list>
+          <option value="N806" />
+        </list>
+      </option>
+    </inspection_tool>
+    <inspection_tool class="PyUnresolvedReferencesInspection" enabled="true" level="WARNING" enabled_by_default="true">
+      <option name="ignoredIdentifiers">
+        <list>
+          <option value="django.db.models.fields.related.OneToOneField.avatar" />
+        </list>
+      </option>
+    </inspection_tool>
+  </profile>
+</component>
