@@ -4,8 +4,8 @@ from typing import Dict
 
 import MDAnalysis as mda
 
-from src.chainsaw.run_chainsaw import predict_chopping_chainsaw_from_pdb
-from src.merizo.run_merizo import predict_chopping_merizo_from_pdb
+from protein_domain_segmentation.chainsaw.run_chainsaw import predict_chopping_chainsaw_from_pdb
+from protein_domain_segmentation.merizo.run_merizo import predict_chopping_merizo_from_pdb
 
 
 class Cluster(abc.ABC):

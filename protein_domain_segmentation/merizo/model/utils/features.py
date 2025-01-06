@@ -8,8 +8,8 @@ from scipy.spatial import distance_matrix
 import torch
 import torch.nn.functional as F
 
-from src.merizo.model.utils.frames import get_frames
-from src.merizo.model.utils.pdb_parser import (
+from protein_domain_segmentation.merizo.model.utils.frames import get_frames
+from protein_domain_segmentation.merizo.model.utils.pdb_parser import (
     select_from_mol,
     get_xyz,
     open_pdb,

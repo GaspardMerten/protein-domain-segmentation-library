@@ -15,7 +15,7 @@ import sys
 
 import numpy as np
 
-from src.chainsaw.constants import REPO_ROOT
+from protein_domain_segmentation.chainsaw.constants import REPO_ROOT
 import logging
 LOG = logging.getLogger(__name__)
 

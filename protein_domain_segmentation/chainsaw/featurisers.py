@@ -7,9 +7,9 @@ import numpy as np
 import torch
 from scipy.spatial import distance_matrix
 
-from src.chainsaw import constants
-from src.chainsaw.constants import _3to1
-from src.chainsaw.utils.secondary_structure import renum_pdb_file, \
+from protein_domain_segmentation.chainsaw import constants
+from protein_domain_segmentation.chainsaw.constants import _3to1
+from protein_domain_segmentation.chainsaw.utils.secondary_structure import renum_pdb_file, \
     calculate_ss, make_ss_matrix
 
 LOG = logging.getLogger(__name__)

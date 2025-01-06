@@ -7,9 +7,9 @@ import numpy as np
 import torch
 from torch.types import Device
 
-from src.merizo.model.network import Merizo
-from src.merizo.model.utils.features import generate_features_domain
-from src.merizo.model.utils.utils import (
+from protein_domain_segmentation.merizo.model.network import Merizo
+from protein_domain_segmentation.merizo.model.utils.features import generate_features_domain
+from protein_domain_segmentation.merizo.model.utils.utils import (
     instance_matrix,
     clean_domains,
     clean_singletons,
@@ -18,7 +18,7 @@ from src.merizo.model.utils.utils import (
     shuffle_ids,
     separate_components, get_device,
 )
-from src.shared.structure import get_model_structure
+from protein_domain_segmentation.shared.structure import get_model_structure
 
 MIN_DOMAIN_SIZE = 50
 MIN_FRAGMENT_SIZE = 10

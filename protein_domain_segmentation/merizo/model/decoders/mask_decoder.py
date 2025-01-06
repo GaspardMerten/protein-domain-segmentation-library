@@ -2,7 +2,7 @@ import torch
 import torch.nn.functional as F
 from torch import nn
 
-from src.merizo.model.utils.utils import clean_domains, clean_singletons
+from protein_domain_segmentation.merizo.model.utils.utils import clean_domains, clean_singletons
 
 # https://github.com/rstrudel/segmenter/blob/master/segm/model/decoder.py
 

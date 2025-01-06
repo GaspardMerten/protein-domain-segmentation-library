@@ -8,10 +8,10 @@ import pandas as pd
 
 import logging
 
-from src.chainsaw.domain_chop import PairwiseDomainPredictor
-from src.chainsaw.models.rosetta import trRosettaNetwork
-from src.chainsaw.domain_assignment.assigners import SparseLowRank
-from src.chainsaw.utils import common as common_utils
+from protein_domain_segmentation.chainsaw.domain_chop import PairwiseDomainPredictor
+from protein_domain_segmentation.chainsaw.models.rosetta import trRosettaNetwork
+from protein_domain_segmentation.chainsaw.domain_assignment.assigners import SparseLowRank
+from protein_domain_segmentation.chainsaw.utils import common as common_utils
 
 
 LOG = logging.getLogger(__name__)

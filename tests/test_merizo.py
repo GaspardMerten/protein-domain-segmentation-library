@@ -1,6 +1,6 @@
 import unittest
 
-from src import MerizoCluster
+from protein_domain_segmentation import MerizoCluster
 
 
 class TestProcessInput(unittest.TestCase):

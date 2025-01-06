@@ -40,8 +40,6 @@ dependencies = [
 Homepage = "https://github.com/GaspardMerten/protein-domain-segmentation-library"
 Issues = "https://github.com/GaspardMerten/protein-domain-segmentation-library/issues"
 
-[tool.setuptools.packages.find]
-where = ["src"]
 
-[tool.setuptools]
-package-dir = { "" = "src" }
+[tool.setuptools.package-data]
+'src' = ['src/model/merizo/*', 'src/model/chainsaw/*']

@@ -1,6 +1,6 @@
 import unittest
 
-from src import ChainsawCluster
+from protein_domain_segmentation import ChainsawCluster
 
 
 class TestChainsaw(unittest.TestCase):
