@@ -1,13 +1,13 @@
 [build-system]
-requires = ["setuptools>=61.0", "torch>=2.0.1", "MDAnalysis>=2.0.0", "pandas", "biopython", "pydantic", "einops", "natsort", "rotary_embedding_torch"]
+requires = ["setuptools>=61.0", "setuptools-scm>=8", "torch>=2.0.1", "MDAnalysis>=2.0.0", "pandas", "biopython", "pydantic", "einops", "natsort", "rotary_embedding_torch"]
 build-backend = "setuptools.build_meta"
 
 [project]
 name = "protein-domain-segmentation"
-version = "0.1.1"
 authors = [
     { name = "Gaspard Merten", email = "gaspard.mp.work@gmail.com" },
 ]
+dynamic = ["version"]
 description = "A library for protein domain segmentation using Merizo and Chainsaw."
 readme = "README.md"
 requires-python = ">=3.8"
@@ -41,5 +41,12 @@ Homepage = "https://github.com/GaspardMerten/protein-domain-segmentation-library
 Issues = "https://github.com/GaspardMerten/protein-domain-segmentation-library/issues"
 
 
+[tool.setuptools]
+include-package-data = true
+
+[tool.setuptools_scm]
+write_to = "protein_domain_segmentation/version.py"
+
+
 [tool.setuptools.package-data]
-'src' = ['src/model/merizo/*', 'src/model/chainsaw/*']
+"*" = ["chainsaw/*.pt", "merizo/*.pt", "chainsaw/*.json", "merizo/*.json"]
