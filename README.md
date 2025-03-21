@@ -8,7 +8,12 @@ This library provides a convenient interface for protein domain segmentation usi
 - **Flexible Input Support**: Predict from PDB files or MDAnalysis universes.
 - **Lightweight Usage**: Avoid integrating full tool codebases directly into your project.
 
+## Requirements
+
+Python 3.10+
+
 ## Installation
+
 
 Install the library and its dependencies using pip:
 
