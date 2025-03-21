@@ -8,7 +8,7 @@ import networkx as nx
 import torch
 from natsort import natsorted
 
-from protein_domain_segmentation.merizo.model.utils.constants import PRIMES
+from src.protein_domain_segmentation.merizo.model.utils.constants import PRIMES
 
 
 def get_device(device: str) -> torch.device:

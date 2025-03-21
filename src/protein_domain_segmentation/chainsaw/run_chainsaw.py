@@ -4,13 +4,13 @@ from dataclasses import dataclass
 from pathlib import Path
 from typing import List, Dict
 
-from protein_domain_segmentation.chainsaw import featurisers
-from protein_domain_segmentation.chainsaw.domain_assignment.util import convert_domain_dict_strings
-from protein_domain_segmentation.chainsaw.factories import pairwise_predictor
-from protein_domain_segmentation.chainsaw.utils import common as common_utils
-from protein_domain_segmentation.shared.structure import get_model_structure
+from ..chainsaw import featurisers
+from ..chainsaw.domain_assignment.util import convert_domain_dict_strings
+from ..chainsaw.factories import pairwise_predictor
+from ..chainsaw.utils import common as common_utils
+from ..shared.structure import get_model_structure
 
-MODEL_DIR = Path(__file__).parent.parent / 'models' / 'chainsaw'
+MODEL_DIR = Path(__file__).parent / 'weights'
 LOG = logging.getLogger(__name__)
 
 

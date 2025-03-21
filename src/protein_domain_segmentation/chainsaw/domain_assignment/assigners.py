@@ -1,6 +1,6 @@
 import numpy as np
 import torch
-from protein_domain_segmentation.chainsaw.domain_assignment.sparse_lowrank import greedy_V
+from ...chainsaw.domain_assignment.sparse_lowrank import greedy_V
 
 
 class BaseAssigner:

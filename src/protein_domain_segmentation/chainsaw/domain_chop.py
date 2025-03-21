@@ -6,7 +6,7 @@ import numpy as np
 import pandas as pd
 import torch
 from torch import nn
-from protein_domain_segmentation.chainsaw.domain_assignment.util import make_pair_labels, make_domain_mapping_dict
+from ..chainsaw.domain_assignment.util import make_pair_labels, make_domain_mapping_dict
 
 import logging
 LOG = logging.getLogger(__name__)

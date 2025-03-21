@@ -7,9 +7,9 @@ import numpy as np
 import torch
 from torch.types import Device
 
-from protein_domain_segmentation.merizo.model.network import Merizo
-from protein_domain_segmentation.merizo.model.utils.features import generate_features_domain
-from protein_domain_segmentation.merizo.model.utils.utils import (
+from ..merizo.model.network import Merizo
+from ..merizo.model.utils.features import generate_features_domain
+from ..merizo.model.utils.utils import (
     instance_matrix,
     clean_domains,
     clean_singletons,
@@ -18,12 +18,14 @@ from protein_domain_segmentation.merizo.model.utils.utils import (
     shuffle_ids,
     separate_components, get_device,
 )
-from protein_domain_segmentation.shared.structure import get_model_structure
+from ..shared.structure import get_model_structure
 
 MIN_DOMAIN_SIZE = 50
 MIN_FRAGMENT_SIZE = 10
 DOM_AVE = 200
 CONF_THRESHOLD = 0.75
+
+WEIGHTS_DIR = Path(__file__).parent / "weights"
 
 
 def iterative_segmentation(
@@ -162,8 +164,7 @@ def predict_chopping_merizo_from_pdb(
     device = get_device(device)
     network = Merizo().to(device)
 
-    weights_dir = Path(__file__).parent.parent / "models" / "merizo"
-    network.load_state_dict(read_split_weight_files(str(weights_dir)), strict=True)
+    network.load_state_dict(read_split_weight_files(str(WEIGHTS_DIR)), strict=True)
     network.eval()
 
     if not os.path.exists(input_path):
