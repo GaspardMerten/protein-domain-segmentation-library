@@ -8,7 +8,7 @@ import networkx as nx
 import torch
 from natsort import natsorted
 
-from src.protein_domain_segmentation.merizo.model.utils.constants import PRIMES
+from ..utils.constants import PRIMES
 
 
 def get_device(device: str) -> torch.device:
@@ -38,7 +38,7 @@ def get_device(device: str) -> torch.device:
 
 
 def get_ids(x: torch.tensor) -> tuple[torch.tensor, int]:
-    """ Returns a tuple containing unique non-zero indices and 
+    """Returns a tuple containing unique non-zero indices and
         the number of unique non-zero indices.
 
     Args:
@@ -46,7 +46,7 @@ def get_ids(x: torch.tensor) -> tuple[torch.tensor, int]:
 
     Returns:
         tuple[torch.tensor, int]:   Tuple of unique non-zero
-                                    domain indices and number of 
+                                    domain indices and number of
                                     such indices
     """
 
@@ -78,8 +78,8 @@ def remap_ids(x):
 
 
 def shuffle_ids(domain_ids: torch.tensor) -> torch.tensor:
-    """ Remap domain indices to increase contrast between
-        domains in PyMOL. 
+    """Remap domain indices to increase contrast between
+        domains in PyMOL.
 
     Args:
         domain_ids (torch.tensor): [N] domain indices [0, ndoms]
@@ -157,8 +157,7 @@ def instance_matrix(labels):
 
 
 def clean_domains(dom_ids: torch.tensor, min_num: int) -> torch.tensor:
-    """ Divides any domains that are too small, equally into the domain before and after it.
-    """
+    """Divides any domains that are too small, equally into the domain before and after it."""
 
     dom_counts = torch.unique(dom_ids[dom_ids.nonzero()], return_counts=True)
     remove_ids = dom_counts[0][dom_counts[1] < min_num]
@@ -173,10 +172,10 @@ def clean_domains(dom_ids: torch.tensor, min_num: int) -> torch.tensor:
 
 
 def assimilate_short_terminal(dom_ids, dom_counts, threshold, termini):
-    """ Assimilates any short stretches of residues the N or C terminus into the 
+    """Assimilates any short stretches of residues the N or C terminus into the
     proceeding/preceeding domain.
     """
-    if termini == 'C':
+    if termini == "C":
         dom_counts = dom_counts.flip([0])
         dom_ids = dom_ids.flip([0])
 
@@ -185,18 +184,18 @@ def assimilate_short_terminal(dom_ids, dom_counts, threshold, termini):
             next_dom_id = dom_ids[i + 1]
             break
 
-    dom_ids[:i + 1] = next_dom_id
+    dom_ids[: i + 1] = next_dom_id
 
-    if termini == 'C':
+    if termini == "C":
         return dom_ids.flip([0])
     else:
         return dom_ids
 
 
 def get_segment_length(dom_ids):
-    """ Returns the length of each segment of a domain.
-        e.g. [1,1,1,1,1,1,5,5,5,5,5,2,2,2,2,2] ->
-             [6,6,6,6,6,6,5,5,5,5,5,5,5,5,5,5]
+    """Returns the length of each segment of a domain.
+    e.g. [1,1,1,1,1,1,5,5,5,5,5,2,2,2,2,2] ->
+         [6,6,6,6,6,6,5,5,5,5,5,5,5,5,5,5]
     """
     dom_counts = torch.ones_like(dom_ids)
     for i, d in enumerate(dom_ids):
@@ -208,21 +207,21 @@ def get_segment_length(dom_ids):
                 counter += 1
                 idx = i
             else:
-                dom_counts[_idx: idx + 1] = counter
+                dom_counts[_idx : idx + 1] = counter
                 counter = 0
                 _idx = i
 
         if i == len(dom_ids) - 1:
-            dom_counts[_idx: idx + 1] = counter
+            dom_counts[_idx : idx + 1] = counter
 
     return dom_counts
 
 
 def clean_singletons(dom_ids: torch.tensor, threshold: int) -> torch.tensor:
-    """ Re-assigns short segments:
-        N-terminus: assimilated into first domain
-        C-terminus: assimilated into last domain
-        internal segments: divided between the preceeding and proceeding domain
+    """Re-assigns short segments:
+    N-terminus: assimilated into first domain
+    C-terminus: assimilated into last domain
+    internal segments: divided between the preceeding and proceeding domain
     """
 
     dom_ids_ = dom_ids
@@ -231,19 +230,21 @@ def clean_singletons(dom_ids: torch.tensor, threshold: int) -> torch.tensor:
     if len(dom_counts <= threshold) != 0:
         # Assimilate short N-terminal stretches
         dom_ids_ = assimilate_short_terminal(
-            dom_ids_, dom_counts, threshold, termini='N')
+            dom_ids_, dom_counts, threshold, termini="N"
+        )
 
         # Assimilate short C-terminal stretches
         dom_ids_ = assimilate_short_terminal(
-            dom_ids_, dom_counts, threshold, termini='C')
+            dom_ids_, dom_counts, threshold, termini="C"
+        )
 
         # Divide internal fragments that are too short
-        short_ndr = (dom_counts < threshold)  # * (dom_ids == 0)
+        short_ndr = dom_counts < threshold  # * (dom_ids == 0)
         non_terminal = torch.where(short_ndr.long() == 0)[0]
 
         # Trim off any N and C-terminal ndr stretches
-        short_ndr[:non_terminal[0]] = False
-        short_ndr[non_terminal[-1]:] = False
+        short_ndr[: non_terminal[0]] = False
+        short_ndr[non_terminal[-1] :] = False
 
         # Subdivide internal NDRs between domains
         true_indices = torch.nonzero(short_ndr).flatten().tolist()
@@ -258,30 +259,34 @@ def clean_singletons(dom_ids: torch.tensor, threshold: int) -> torch.tensor:
             start, end = stretch[0].item(), stretch[-1].item()
             mid = torch.median(stretch).item()
 
-            dom_ids_[start:mid + 1] = dom_ids_[start - 1]
-            dom_ids_[mid:end + 1] = dom_ids_[end + 1]
+            dom_ids_[start : mid + 1] = dom_ids_[start - 1]
+            dom_ids_[mid : end + 1] = dom_ids_[end + 1]
 
     return dom_ids_
 
 
 def separate_components(feature_dict: dict, distance: float = 8.0) -> torch.tensor:
-    """ Separates domains in the domain map based on a minimum distance.
-        Takes the intersect between the domain map and distance map 
+    """Separates domains in the domain map based on a minimum distance.
+        Takes the intersect between the domain map and distance map
         graphs to disconnect discontinuous associations between segments
-        when the distance (Angstroms) between them is greater then 
-        <distance>. 
+        when the distance (Angstroms) between them is greater then
+        <distance>.
 
     Args:
         domain_map (torch.tensor):  [N,N]   domain map [0,1]
         z (torch.tensor):           [N,N,1] distance map [0,inf]
         domain_ids (torch.tensor):  [N]     domain indices [0, ndom]
-        distance (float, optional):         distance cutoff in Angstroms    
+        distance (float, optional):         distance cutoff in Angstroms
 
     Returns:
         torch.tensor:               [N]     updated domain indices [0, ndom]
     """
 
-    domain_map, z, domain_ids = feature_dict['domain_map'], feature_dict['z'], feature_dict['domain_ids']
+    domain_map, z, domain_ids = (
+        feature_dict["domain_map"],
+        feature_dict["z"],
+        feature_dict["domain_ids"],
+    )
 
     # Re-assign indices based on distance cut off between domains
     dm = z.reshape(z.shape[1], z.shape[1])

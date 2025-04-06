@@ -2,9 +2,10 @@ import torch
 import torch.nn.functional as F
 from torch import nn
 
-from src.protein_domain_segmentation.merizo.model.utils.utils import clean_domains, clean_singletons
+from ..utils.utils import clean_domains, clean_singletons
 
 # https://github.com/rstrudel/segmenter/blob/master/segm/model/decoder.py
+
 
 class FeedForward(nn.Module):
     def __init__(self, dim, hidden_dim, dropout, out_dim=None):
@@ -59,7 +60,7 @@ class Attention(nn.Module):
         if bias is not None:
             qk = qk + bias
 
-        attn = qk 
+        attn = qk
         attn = attn.softmax(dim=-1)
         attn = self.attn_drop(attn)
 
@@ -199,7 +200,7 @@ class MaskTransformer(nn.Module):
 
         # Iterate over each pred index and pass through gru to predict confidence
         conf_res = torch.zeros_like(dom_ids).float()
-        
+
         for i, d in enumerate(unique_ids):
             dom = domain_masks[:, dom_ids == d]
 
@@ -212,4 +213,3 @@ class MaskTransformer(nn.Module):
             conf_res[dom_ids == d] = dom_conf
 
         return dom_ids.reshape(-1), conf_res.reshape(-1)
-    

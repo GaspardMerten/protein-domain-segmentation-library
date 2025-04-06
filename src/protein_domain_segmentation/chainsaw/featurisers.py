@@ -9,12 +9,14 @@ from scipy.spatial import distance_matrix
 
 from ..chainsaw import constants
 from ..chainsaw.constants import _3to1
-from ..chainsaw.utils.secondary_structure import renum_pdb_file, \
-    calculate_ss, make_ss_matrix
+from ..chainsaw.utils.secondary_structure import (
+    renum_pdb_file,
+    calculate_ss,
+    make_ss_matrix,
+)
+from ..shared.structure import get_model_structure
 
 LOG = logging.getLogger(__name__)
-
-
 
 
 class Residue:
@@ -23,7 +25,10 @@ class Residue:
         self.res_label = str(res_label)
         self.aa = str(aa)
 
-def get_model_structure_residues(structure_model: Bio.PDB.Structure, chain='A') -> List[Residue]:
+
+def get_model_structure_residues(
+    structure_model: Bio.PDB.Structure, chain="A"
+) -> List[Residue]:
     """
     Returns a list of residues from a given PDB or MMCIF structure
     """
@@ -33,7 +38,7 @@ def get_model_structure_residues(structure_model: Bio.PDB.Structure, chain='A') 
         res_num = biores.id[1]
         res_ins = biores.id[2]
         res_label = str(res_num)
-        if res_ins != ' ':
+        if res_ins != " ":
             res_label += str(res_ins)
 
         aa3 = biores.get_resname()
@@ -50,40 +55,54 @@ def get_model_structure_residues(structure_model: Bio.PDB.Structure, chain='A') 
     return residues
 
 
-def inference_time_create_features(pdb_path, feature_config, chain="A", *,
-                                   model_structure: Bio.PDB.Structure=None,
-                                   renumber_pdbs=True, stride_path=constants.STRIDE_EXE,
-                                   ):
+def inference_time_create_features(
+    pdb_path,
+    feature_config,
+    chain="A",
+    *,
+    model_structure: Bio.PDB.Structure = None,
+    renumber_pdbs=True,
+    stride_path=constants.STRIDE_PATH,
+):
     if not model_structure:
         model_structure = get_model_structure(pdb_path)
 
     dist_matrix = get_distance(model_structure, chain=chain)
     if renumber_pdbs:
-        output_pdb_path = pdb_path.replace('.pdb', '_renum.pdb').replace('.cif', '_renum.cif')
+        output_pdb_path = pdb_path.replace(".pdb", "_renum.pdb").replace(
+            ".cif", "_renum.cif"
+        )
         renum_pdb_file(pdb_path, output_pdb_path)
     else:
         output_pdb_path = pdb_path
-    ss_filepath = pdb_path + '_ss.txt'
+    ss_filepath = pdb_path + "_ss.txt"
     calculate_ss(output_pdb_path, chain, stride_path, ssfile=ss_filepath)
     helix, strand = make_ss_matrix(ss_filepath, nres=dist_matrix.shape[-1])
-    if feature_config['ss_bounds']:
-        end_res_val = -1 if feature_config['negative_ss_end'] else 1
+    if feature_config["ss_bounds"]:
+        end_res_val = -1 if feature_config["negative_ss_end"] else 1
         helix_boundaries = make_boundary_matrix(helix, end_res_val=end_res_val)
         strand_boundaries = make_boundary_matrix(strand, end_res_val=end_res_val)
     if renumber_pdbs:
         os.remove(output_pdb_path)
     os.remove(ss_filepath)
-    LOG.info(f"Distance matrix shape: {dist_matrix.shape}, SS matrix shape: {helix.shape}")
-    if feature_config['ss_bounds']:
-        if feature_config['same_channel_boundaries_and_ss']:
+    LOG.info(
+        f"Distance matrix shape: {dist_matrix.shape}, SS matrix shape: {helix.shape}"
+    )
+    if feature_config["ss_bounds"]:
+        if feature_config["same_channel_boundaries_and_ss"]:
             helix_boundaries[helix == 1] = 1
             strand_boundaries[strand == 1] = 1
-            stacked_features = np.stack((dist_matrix, helix_boundaries, strand_boundaries), axis=0)
+            stacked_features = np.stack(
+                (dist_matrix, helix_boundaries, strand_boundaries), axis=0
+            )
         else:
-            stacked_features = np.stack((dist_matrix, helix, strand, helix_boundaries, strand_boundaries), axis=0)
+            stacked_features = np.stack(
+                (dist_matrix, helix, strand, helix_boundaries, strand_boundaries),
+                axis=0,
+            )
     else:
         stacked_features = np.stack((dist_matrix, helix, strand), axis=0)
-    stacked_features = stacked_features[None] # add batch dimension
+    stacked_features = stacked_features[None]  # add batch dimension
     return torch.Tensor(stacked_features)
 
 
@@ -112,10 +131,17 @@ def distance_matrix(x):
     return distance_matrix.astype(np.float16)
 
 
-def get_distance(structure_model: Bio.PDB.Structure, chain='A'):
-    alpha_coords = np.array([residue['CA'].get_coord() for residue in \
-                             structure_model[chain].get_residues() if Bio.PDB.is_aa(residue) and \
-                             'CA' in residue and residue.get_resname() in _3to1], dtype=np.float16)
+def get_distance(structure_model: Bio.PDB.Structure, chain="A"):
+    alpha_coords = np.array(
+        [
+            residue["CA"].get_coord()
+            for residue in structure_model[chain].get_residues()
+            if Bio.PDB.is_aa(residue)
+            and "CA" in residue
+            and residue.get_resname() in _3to1
+        ],
+        dtype=np.float16,
+    )
     x = distance_matrix(alpha_coords)
     return x
 

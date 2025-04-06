@@ -8,31 +8,50 @@ from scipy.spatial import distance_matrix
 import torch
 import torch.nn.functional as F
 
-from src.protein_domain_segmentation.merizo.model.utils.frames import get_frames
-from src.protein_domain_segmentation.merizo.model.utils.pdb_parser import (
+from ...model.utils.frames import get_frames
+from ...model.utils.pdb_parser import (
     select_from_mol,
     get_xyz,
     open_pdb,
     check_bb,
-    check_alt_res
+    check_alt_res,
 )
 
 
-resndict = {'ALA': 'A', 'ARG': 'R', 'ASN': 'N', 'ASP': 'D', 'CYS': 'C',
-            'GLN': 'Q', 'GLU': 'E', 'GLY': 'G', 'HIS': 'H', 'ILE': 'I',
-            'LEU': 'L', 'LYS': 'K', 'MET': 'M', 'PHE': 'F', 'PRO': 'P',
-            'SER': 'S', 'THR': 'T', 'TRP': 'W', 'TYR': 'Y', 'VAL': 'V',
-            'PAD': 'X',
-            # Histidine variants:
-            'HID': 'H', 'HIP': 'H', 'HIE': 'H',
-            # Cystein variants:
-            'CYX': 'C',
-            }
+resndict = {
+    "ALA": "A",
+    "ARG": "R",
+    "ASN": "N",
+    "ASP": "D",
+    "CYS": "C",
+    "GLN": "Q",
+    "GLU": "E",
+    "GLY": "G",
+    "HIS": "H",
+    "ILE": "I",
+    "LEU": "L",
+    "LYS": "K",
+    "MET": "M",
+    "PHE": "F",
+    "PRO": "P",
+    "SER": "S",
+    "THR": "T",
+    "TRP": "W",
+    "TYR": "Y",
+    "VAL": "V",
+    "PAD": "X",
+    # Histidine variants:
+    "HID": "H",
+    "HIP": "H",
+    "HIE": "H",
+    # Cystein variants:
+    "CYX": "C",
+}
 
-aa_trans = str.maketrans('ARNDCQEGHILKMFPSTWYVBJOUXZ-.',
-                         'ABCDEFGHIJKLMNOPQRSTUUUUUUVV')
+aa_trans = str.maketrans("ARNDCQEGHILKMFPSTWYVBJOUXZ-.", "ABCDEFGHIJKLMNOPQRSTUUUUUUVV")
 
-def generate_features_domain(file: str, device: torch.device, pdb_chain: str="A"):
+
+def generate_features_domain(file: str, device: torch.device, pdb_chain: str = "A"):
     """Returns single, pair, rotation, translation and resi index features for a pdb.
 
     Args:
@@ -59,7 +78,7 @@ def generate_features_domain(file: str, device: torch.device, pdb_chain: str="A"
     z = torch.tensor(get_dmap(ca, missing=False)).unsqueeze(-1)
 
     ri = torch.tensor(ca["resi"])
-    b = torch.tensor(ca['b'])
+    b = torch.tensor(ca["b"])
 
     backbone = select_from_mol([backbone], "resi", ca["resi"])
     r, t = get_frames(backbone)
@@ -70,24 +89,35 @@ def generate_features_domain(file: str, device: torch.device, pdb_chain: str="A"
     t = t.unsqueeze(0).float().to(device)
     ri = ri.unsqueeze(0).float().to(device)
 
-    return {'s': s, 'z': z, 'r': r, 't': t, 'ri': ri, 'pdb': pdb, 'b': b, 'nres': s.shape[1]}
+    return {
+        "s": s,
+        "z": z,
+        "r": r,
+        "t": t,
+        "ri": ri,
+        "pdb": pdb,
+        "b": b,
+        "nres": s.shape[1],
+    }
 
-def pdb_to_features(file, pdb_chain: str="A", resi=None):
+
+def pdb_to_features(file, pdb_chain: str = "A", resi=None):
 
     if os.path.exists(file):
         pdb = open_pdb(file, pdb_chain)
         pdb = check_bb(check_alt_res(pdb), missing=False)
-        pdb = [np.sort(pdb[0], order='resi')]
+        pdb = [np.sort(pdb[0], order="resi")]
 
         if resi is not None:
-            pdb = select_from_mol(pdb, 'resi', resi)
+            pdb = select_from_mol(pdb, "resi", resi)
 
-        backbone = select_from_mol(pdb, 'n', ['N', 'CA', 'C', 'O'])[0]
-        ca = select_from_mol(pdb, 'n', ['CA'])[0]
+        backbone = select_from_mol(pdb, "n", ["N", "CA", "C", "O"])[0]
+        ca = select_from_mol(pdb, "n", ["CA"])[0]
 
         return pdb[0], ca, backbone
     else:
         print("Cannot find model {}".format(os.path.basename(file)))
+
 
 def pdb_to_fasta(pdb: np.ndarray) -> str:
     """_summary_
@@ -99,28 +129,29 @@ def pdb_to_fasta(pdb: np.ndarray) -> str:
         str: _description_
     """
 
-    return ''.join([resndict[x] for x in pdb[pdb['n'] == 'CA']['resn']])
+    return "".join([resndict[x] for x in pdb[pdb["n"] == "CA"]["resn"]])
+
 
 def cath_dom_str_to_resi(c):
-    """ Retrieves the first and last residue from a residue range.
-        Handles negative first or negative second ids """
+    """Retrieves the first and last residue from a residue range.
+    Handles negative first or negative second ids"""
 
-    c = re.sub(r'[A-Z]', '', c).replace('(', '').replace(')', '')
+    c = re.sub(r"[A-Z]", "", c).replace("(", "").replace(")", "")
 
     # If first number is negative, temp replace with +
-    if c[0] == '-':
+    if c[0] == "-":
         c = list(c)
-        c[0] = '+'
-        c = ''.join(c)
+        c[0] = "+"
+        c = "".join(c)
 
     # If second number is negative, temp replace with +
-    if '--' in c:
-        c = c.replace('--', '-+')
+    if "--" in c:
+        c = c.replace("--", "-+")
 
     a, b = c.split("-")
 
-    a = int(a.replace('+', '-'))
-    b = int(b.replace('+', '-'))
+    a = int(a.replace("+", "-"))
+    b = int(b.replace("+", "-"))
 
     return a, b
 
@@ -143,49 +174,55 @@ def boundaries_to_res(boundaries, query=None, resi=None):
                 counter += 1
                 a += 1
 
-                assert counter < 5, f"Cannot find residue a: {orig_a} for pdb {query} in: {resi}"
+                assert (
+                    counter < 5
+                ), f"Cannot find residue a: {orig_a} for pdb {query} in: {resi}"
 
             orig_b, counter = b, 1
             while b not in resi:
                 counter += 1
                 b -= 1
 
-                assert counter < 5, f"Cannot find residue b: {orig_b} for pdb {query} in: {resi}"
+                assert (
+                    counter < 5
+                ), f"Cannot find residue b: {orig_b} for pdb {query} in: {resi}"
 
             lb_id.append((list(resi).index(a), list(resi).index(b)))
 
         lb_resi.append((a, b))
         ranges.extend([a, b])
-        residues.extend(range(a, b+1))
+        residues.extend(range(a, b + 1))
 
     if resi is not None:
-        min_max_id = (list(resi).index(min(ranges)),
-                      list(resi).index(max(ranges)))
+        min_max_id = (list(resi).index(min(ranges)), list(resi).index(max(ranges)))
     else:
         min_max_id = None
 
     domains = {
-        'domain_resi': lb_resi,
-        'domain_id': lb_id,
-        'min_max_resi': (min(ranges), max(ranges)),
-        'min_max_id': min_max_id,
-        'residues': residues,
+        "domain_resi": lb_resi,
+        "domain_id": lb_id,
+        "min_max_resi": (min(ranges), max(ranges)),
+        "min_max_id": min_max_id,
+        "residues": residues,
     }
 
     return domains
 
 
 def encode_seq(seq, three_letter=False):
-    """ Encodes a single-letter protein sequence into integers """
+    """Encodes a single-letter protein sequence into integers"""
     if three_letter:
         seq = [resndict[s] for s in seq]
 
-    return (np.frombuffer(''.join(seq).translate(aa_trans).encode(
-        'latin-1'), dtype=np.uint8) - ord('A'))  # .view(len(seq))
+    return np.frombuffer(
+        "".join(seq).translate(aa_trans).encode("latin-1"), dtype=np.uint8
+    ) - ord(
+        "A"
+    )  # .view(len(seq))
 
 
 def get_dmap(mol, missing=True):
-    """ Returns (distance matrix, resi list) for a molecule
+    """Returns (distance matrix, resi list) for a molecule
 
     Inputs:
         mol: pdb in a numpy structured array
@@ -204,46 +241,45 @@ def get_dmap(mol, missing=True):
 
 
 def get_hmap(mol):
-    """ Return the backbone hydrogen bonding map """
+    """Return the backbone hydrogen bonding map"""
 
-    mol = mol[np.argsort(mol, order=['resi'])]
-    n_atoms = mol[mol['n'] == 'N']
-    o_atoms = mol[mol['n'] == 'O']
+    mol = mol[np.argsort(mol, order=["resi"])]
+    n_atoms = mol[mol["n"] == "N"]
+    o_atoms = mol[mol["n"] == "O"]
 
-    ri = abs(n_atoms['resi'][..., None] - n_atoms['resi'][..., None, :])
+    ri = abs(n_atoms["resi"][..., None] - n_atoms["resi"][..., None, :])
     hmap_no = distance_matrix(
-        get_xyz(n_atoms, gaps=False).T,
-        get_xyz(o_atoms, gaps=False).T
+        get_xyz(n_atoms, gaps=False).T, get_xyz(o_atoms, gaps=False).T
     )
 
     hmap_no[(hmap_no >= 3.5) | (ri < 3)] = 0
     hmap_no[hmap_no != 0] = 1
 
     hmap_on = distance_matrix(
-        get_xyz(o_atoms, gaps=False).T,
-        get_xyz(n_atoms, gaps=False).T
+        get_xyz(o_atoms, gaps=False).T, get_xyz(n_atoms, gaps=False).T
     )
 
     hmap_on[(hmap_on >= 3.5) | (ri < 3)] = 0
     hmap_on[hmap_on != 0] = 1
 
-    hmap = torch.cat((torch.tensor(hmap_no).unsqueeze(-1),
-                      torch.tensor(hmap_on).unsqueeze(-1)), dim=-1)
+    hmap = torch.cat(
+        (torch.tensor(hmap_no).unsqueeze(-1), torch.tensor(hmap_on).unsqueeze(-1)),
+        dim=-1,
+    )
 
     assert hmap.shape[0] == hmap.shape[1]
 
     return hmap
 
 
-def cent_to_dist(
-    cent, min_bin=0, max_bin=90, no_bins=10, inf=1e8
-):
+def cent_to_dist(cent, min_bin=0, max_bin=90, no_bins=10, inf=1e8):
     lower = torch.linspace(min_bin, max_bin, no_bins)
     upper = torch.cat([lower[1:], lower.new_tensor([inf])], dim=-1)
 
     dg = cent.unsqueeze(-1).expand(-1, -1, no_bins)
 
     return ((dg > lower) * (dg < upper)).type(cent.dtype)
+
 
 def dm_to_distogram(dm, min_bin=3.25, max_bin=50.75, no_bins=39, inf=1e8):
     lower = torch.linspace(min_bin, max_bin, no_bins)
