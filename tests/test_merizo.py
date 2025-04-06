@@ -1,7 +1,7 @@
 import unittest
 from pathlib import Path
 
-from protein_domain_segmentation import MerizoCluster
+from src.protein_domain_segmentation import MerizoCluster
 
 TEST_FOLDER = Path(__file__).parent
 

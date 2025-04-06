@@ -20,8 +20,8 @@ class Cluster(abc.ABC):
         """
         Predicts the chopping of a protein from a MDAnalysis Universe
         """
-        with tempfile.NamedTemporaryFile() as temp_pdb:
-            universe.atoms.write(temp_pdb, format="pdb")
+        with tempfile.NamedTemporaryFile(suffix=".pdb") as temp_pdb:
+            universe.atoms.write(temp_pdb.name)
             return self.predict_from_pdb(temp_pdb.name, model_params)
 
 
